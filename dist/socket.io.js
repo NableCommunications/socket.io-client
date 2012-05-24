@@ -1,6 +1,6 @@
 /*! Socket.IO.js build:0.9.6, development. Copyright(c) 2011 LearnBoost <dev@learnboost.com> MIT Licensed */
 this.io = {};
-exports = this.io;
+module.exports = this.io;
 
 /**
  * socket.io
@@ -1363,7 +1363,7 @@ exports = this.io;
    */
 
   Transport.prototype.clearCloseTimeout = function () {
-    if (this.closeTimeout) {
+    if (this.closeTimeout && typeof this.closeTimeout === 'number') {
       clearTimeout(this.closeTimeout);
       this.closeTimeout = null;
     }
@@ -1378,7 +1378,7 @@ exports = this.io;
   Transport.prototype.clearTimeouts = function () {
     this.clearCloseTimeout();
 
-    if (this.reopenTimeout) {
+    if (this.reopenTimeout && typeof this.reopenTimeout === 'number') {
       clearTimeout(this.reopenTimeout);
     }
   };
@@ -1713,7 +1713,9 @@ exports = this.io;
       connect(self.transports);
 
       self.once('connect', function (){
-        clearTimeout(self.connectTimeoutTimer);
+        if (typeof self.connectTimeoutTimer === 'number') {
+          clearTimeout(self.connectTimeoutTimer);
+        }        
 
         fn && typeof fn == 'function' && fn();
       });
@@ -1730,7 +1732,9 @@ exports = this.io;
    */
 
   Socket.prototype.setHeartbeatTimeout = function () {
-    clearTimeout(this.heartbeatTimeoutTimer);
+    if (typeof this.heartbeatTimeoutTimer === 'number') {
+      clearTimeout(this.heartbeatTimeoutTimer);
+    }    
 
     var self = this;
     this.heartbeatTimeoutTimer = setTimeout(function () {
@@ -1856,7 +1860,9 @@ exports = this.io;
 
   Socket.prototype.onClose = function () {
     this.open = false;
-    clearTimeout(this.heartbeatTimeoutTimer);
+    if (typeof this.heartbeatTimeoutTimer === 'number') {
+      clearTimeout(this.heartbeatTimeoutTimer);
+    }    
   };
 
   /**
@@ -1941,7 +1947,9 @@ exports = this.io;
         self.publish('reconnect', self.transport.name, self.reconnectionAttempts);
       }
 
-      clearTimeout(self.reconnectionTimer);
+      if (typeof self.reconnectionTimer === 'number') {
+        clearTimeout(self.reconnectionTimer);
+      }      
 
       self.removeListener('connect_failed', maybeReconnect);
       self.removeListener('connect', maybeReconnect);
@@ -3444,7 +3452,7 @@ return exports;}());
 	};
 
 	WebSocket.prototype._socket_close = function() {
-		if(this._closingTimer) {
+		if(this._closingTimer && typeof this._closingTimer === 'number') {
 			clearTimeout(this._closingTimer);
 		}
 		this._closingTimer = undefined;
