@@ -9,7 +9,7 @@
  */
 
 var fs = require('fs')
-  , socket = require('../lib/io')
+  , version = '0.9.6'
   , uglify = require('uglify-js')
   , activeXObfuscator = require('active-x-obfuscator');
 
@@ -19,7 +19,7 @@ var fs = require('fs')
  * @api private
  */
 
-var template = '/*! Socket.IO.%ext% build:' + socket.version + ', %type%. Copyright(c) 2011 LearnBoost <dev@learnboost.com> MIT Licensed */\n'
+var template = '/*! Socket.IO.%ext% build:' + version + ', %type%. Copyright(c) 2011 LearnBoost <dev@learnboost.com> MIT Licensed */\n'
   , development = template.replace('%type%', 'development').replace('%ext%', 'js')
   , production = template.replace('%type%', 'production').replace('%ext%', 'min.js');
 
@@ -65,8 +65,11 @@ var base = [
  */
 
 var baseTransports = {
-    'websocket': ['transports/websocket.js']
-  , 'flashsocket': [
+    'websocket': [
+        'transports/websocket.js'
+      , 'vendor/ti-websocket-client.js'
+    ]
+    , 'flashsocket': [
         'transports/websocket.js'
       , 'transports/flashsocket.js'
       , 'vendor/web-socket-js/swfobject.js'
@@ -233,7 +236,7 @@ var builder = module.exports = function () {
  * @api public
  */
  
-builder.version = socket.version;
+builder.version = version;
 
 /**
  * A list of all build in transport types.
