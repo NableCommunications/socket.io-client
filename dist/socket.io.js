@@ -1315,6 +1315,10 @@ module.exports = this.io;
 
         if (xhr.status == 200) {
           complete(xhr.responseText);
+        } else if (xhr.status == 0) { // jordi
+          setTimeout(function () {
+            self.handshake(fn);
+          }, 6120);
         } else {
           self.connecting = false;            
           !self.reconnecting && self.onError(xhr.responseText);
