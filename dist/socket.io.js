@@ -1212,6 +1212,7 @@ module.exports = this.io;
 
     io.util.merge(this.options, options);
 
+    this.firstHandshake = true;
     this.connected = false;
     this.open = false;
     this.connecting = false;
@@ -1314,12 +1315,17 @@ module.exports = this.io;
         xhr.onreadystatechange = empty;
 
         if (xhr.status == 200) {
+          self.firstHandshake = false;
           complete(xhr.responseText);
-        } else if (xhr.status == 0) { // jordi
+        } else if (xhr.status == 0) {
+          if (!self.firstHandshake) {
+            return;
+          }
           setTimeout(function () {
             self.handshake(fn);
           }, 6120);
         } else {
+          self.firstHandshake = false;
           self.connecting = false;            
           !self.reconnecting && self.onError(xhr.responseText);
         }
