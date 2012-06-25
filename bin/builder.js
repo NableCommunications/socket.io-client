@@ -67,7 +67,6 @@ var base = [
 var baseTransports = {
     'websocket': [
         'transports/websocket.js'
-      , 'vendor/ti-websocket-client.js'
     ]
     , 'flashsocket': [
         'transports/websocket.js'
