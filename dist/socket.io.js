@@ -2,8 +2,6 @@
 
 var io = ('undefined' === typeof module ? {} : module.exports);
 (function() {
-this.io = {};
-module.exports = this.io;
 
 /**
  * socket.io
@@ -74,6 +72,13 @@ module.exports = this.io;
       , uuri
       , socket;
 
+    if (global && global.location) {
+      uri.protocol = uri.protocol || global.location.protocol.slice(0, -1);
+      uri.host = uri.host || (global.document
+        ? global.document.domain : global.location.hostname);
+      uri.port = uri.port || global.location.port;
+    }
+
     uuri = io.util.uniqueUri(uri);
 
     var options = {
@@ -99,7 +104,7 @@ module.exports = this.io;
     return socket.of(uri.path.length > 1 ? uri.path : '');
   };
 
-})(this.io, this);/**
+})('object' === typeof module ? module.exports : (this.io = {}), this);/**
  * socket.io
  * Copyright(c) 2011 LearnBoost <dev@learnboost.com>
  * MIT Licensed
