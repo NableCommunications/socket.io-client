@@ -1,4 +1,7 @@
 /*! Socket.IO.js build:0.9.6, development. Copyright(c) 2011 LearnBoost <dev@learnboost.com> MIT Licensed */
+
+var io = ('undefined' === typeof module ? {} : module.exports);
+(function() {
 this.io = {};
 module.exports = this.io;
 
@@ -2149,3 +2152,5 @@ module.exports = this.io;
   , 'undefined' != typeof io ? io : module.parent.exports
   , this
 );
+
+})();
