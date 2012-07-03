@@ -1315,30 +1315,31 @@ var io = ('undefined' === typeof module ? {} : module.exports);
         , io.util.query(this.options.query, 't=' + +new Date)
       ].join('/');
 
-    var xhr = Ti.Network.createHTTPClient();
-    xhr.open('GET', url, true);
-    xhr.withCredentials = true;
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState == 4) {
-        xhr.onreadystatechange = empty;
-
-        if (xhr.status == 200) {
-          self.firstHandshake = false;
-          complete(xhr.responseText);
-        } else if (xhr.status == 0) {
-          if (!self.firstHandshake) {
-            return;
-          }
+    var xhr = Ti.Network.createHTTPClient({
+      withCredentials: true,
+      onload: function () {
+        self.firstHandshake = false;
+        complete(xhr.responseText);
+      },
+      onerror: function (ev) {
+        if (self.firstHandshake) {
           setTimeout(function () {
             self.handshake(fn);
           }, 6120);
-        } else {
-          self.firstHandshake = false;
-          self.connecting = false;            
-          !self.reconnecting && self.onError(xhr.responseText);
+          return;
         }
+
+        self.connecting = false;
+        var err = {
+          reason: ev.error
+        };
+        if (ev.error.indexOf('refused')) {
+          err.advice = 'reconnect';
+        }
+        !self.reconnecting && self.onError(err);
       }
-    };
+    });
+    xhr.open('GET', url, true);
     xhr.send(null);
   };
 
@@ -1397,6 +1398,9 @@ var io = ('undefined' === typeof module ? {} : module.exports);
 
         // once the transport is ready
         self.transport.ready(self, function () {
+          if (typeof self.transport.open != "function")
+            return self.publish('connect_failed');
+            
           self.connecting = true;
           self.publish('connecting', self.transport.name);
           self.transport.open();
@@ -2029,20 +2033,23 @@ var io = ('undefined' === typeof module ? {} : module.exports);
 
     this.websocket = require('net.iamyellow.tiws').createWS();    
 
-    this.websocket.onopen = function () {
+    this.websocket.addEventListener('open', function () {
       self.onOpen();
       self.socket.setBuffer(false);
-    };
-    this.websocket.onmessage = function (ev) {
+    });
+
+    this.websocket.addEventListener('message', function (ev) {
       self.onData(ev.data);
-    };
-    this.websocket.onclose = function () {
+    });
+
+    this.websocket.addEventListener('close', function (ev) {
       self.onClose();
       self.socket.setBuffer(true);
-    };
-    this.websocket.onerror = function (e) {
-      self.onError(e);
-    };
+    });
+
+    this.websocket.addEventListener('error', function (ev) {
+      self.onError(ev);
+    });
 
     this.websocket.open(this.prepareUrl() + query);
 
@@ -2096,7 +2103,9 @@ var io = ('undefined' === typeof module ? {} : module.exports);
    */
 
   WS.prototype.close = function () {
-    this.websocket.close();
+    // server is going to close the socket after we send the disconnect packet 
+    // then, the webscoket will destroy itself (e.g. dealloc in ios)
+    //this.websocket.close();
     return this;
   };
 
