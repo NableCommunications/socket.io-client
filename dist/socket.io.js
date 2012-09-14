@@ -1,6 +1,7 @@
-/*! Socket.IO.js build:0.9.6, development. Copyright(c) 2011 LearnBoost <dev@learnboost.com> MIT Licensed */
-
-var io = ('undefined' === typeof module ? {} : module.exports);
+/*! Socket.IO.js build:0.9.10, development. Copyright(c) 2011 LearnBoost <dev@learnboost.com> MIT Licensed */
+/*global console: true, setTimeout: true, clearTimeout: true, setInterval: true, clearInterval: true, module: true, exports: true, require: true, document: true, XMLHttpRequest: true, window: true*/
+/*jshint laxcomma: true, unused: false*/
+var io = {}; exports = io;
 (function() {
 
 /**
@@ -72,12 +73,12 @@ var io = ('undefined' === typeof module ? {} : module.exports);
       , uuri
       , socket;
 
-    if (global && global.location) {
+    /*if (global && global.location) {
       uri.protocol = uri.protocol || global.location.protocol.slice(0, -1);
       uri.host = uri.host || (global.document
         ? global.document.domain : global.location.hostname);
       uri.port = uri.port || global.location.port;
-    }
+    }*/
 
     uuri = io.util.uniqueUri(uri);
 
@@ -104,7 +105,7 @@ var io = ('undefined' === typeof module ? {} : module.exports);
     return socket.of(uri.path.length > 1 ? uri.path : '');
   };
 
-})('object' === typeof module ? module.exports : (this.io = {}), this);
+})(io, this);
 /**
  * socket.io
  * Copyright(c) 2011 LearnBoost <dev@learnboost.com>
@@ -437,7 +438,7 @@ var io = ('undefined' === typeof module ? {} : module.exports);
    * @api public
    */
 
-  util.ua.hasCORS = 'undefined' != typeof XMLHttpRequest && (function () {
+  util.ua.hasCORS = true;/*'undefined' != typeof XMLHttpRequest && (function () {
     try {
       var a = new XMLHttpRequest();
     } catch (e) {
@@ -445,7 +446,7 @@ var io = ('undefined' === typeof module ? {} : module.exports);
     }
 
     return a.withCredentials != undefined;
-  })();
+  })();*/
 
   /**
    * Detect webkit.
@@ -453,8 +454,8 @@ var io = ('undefined' === typeof module ? {} : module.exports);
    * @api public
    */
 
-  util.ua.webkit = 'undefined' != typeof navigator
-    && /webkit/i.test(navigator.userAgent);
+  util.ua.webkit = false;//'undefined' != typeof navigator
+    //&& /webkit/i.test(navigator.userAgent);
 
    /**
    * Detect iPad/iPhone/iPod.
@@ -462,8 +463,8 @@ var io = ('undefined' === typeof module ? {} : module.exports);
    * @api public
    */
 
-  util.ua.iDevice = 'undefined' != typeof navigator
-      && /iPad|iPhone|iPod/i.test(navigator.userAgent);
+  util.ua.iDevice = false;//'undefined' != typeof navigator
+      //&& /iPad|iPhone|iPod/i.test(navigator.userAgent);
 
 })('undefined' != typeof io ? io : module.exports, this);
 /**
@@ -1322,7 +1323,7 @@ var io = ('undefined' === typeof module ? {} : module.exports);
         , options.host + ':' + options.port
         , options.resource
         , io.protocol
-        , io.util.query(this.options.query, 't=' + +new Date)
+        , io.util.query(this.options.query, 't=' + new Date)
       ].join('/');
 
     var xhr = Ti.Network.createHTTPClient({
@@ -2095,20 +2096,10 @@ var io = ('undefined' === typeof module ? {} : module.exports);
   // Do to a bug in the current IDevices browser, we need to wrap the send in a 
   // setTimeout, when they resume from sleeping the browser will crash if 
   // we don't allow the browser time to detect the socket has been closed
-  if (io.util.ua.iDevice) {
-    WS.prototype.send = function (data) {
-      var self = this;
-      setTimeout(function() {
-         self.websocket.send(data);
-      },0);
-      return this;
-    };
-  } else {
-    WS.prototype.send = function (data) {
-      this.websocket.send(data);
-      return this;
-    };
-  }
+  WS.prototype.send = function (data) {
+    this.websocket.send(data);
+    return this;
+  };
 
   /**
    * Payload
@@ -2131,9 +2122,7 @@ var io = ('undefined' === typeof module ? {} : module.exports);
    */
 
   WS.prototype.close = function () {
-    // server is going to close the socket after we send the disconnect packet 
-    // then, the webscoket will destroy itself (e.g. dealloc in ios)
-    //this.websocket.close();
+    this.websocket.close();
     return this;
   };
 
@@ -2194,5 +2183,4 @@ var io = ('undefined' === typeof module ? {} : module.exports);
   , 'undefined' != typeof io ? io : module.parent.exports
   , this
 );
-
 })();

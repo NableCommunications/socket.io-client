@@ -9,7 +9,7 @@
  */
 
 var fs = require('fs')
-  , version = '0.9.6'
+  , version = '0.9.10'
   , uglify = require('uglify-js')
   , activeXObfuscator = require('active-x-obfuscator');
 
@@ -68,21 +68,6 @@ var baseTransports = {
     'websocket': [
         'transports/websocket.js'
     ]
-    , 'flashsocket': [
-        'transports/websocket.js'
-      , 'transports/flashsocket.js'
-      , 'vendor/web-socket-js/swfobject.js'
-      , 'vendor/web-socket-js/web_socket.js'
-    ] 
-  , 'htmlfile': ['transports/xhr.js', 'transports/htmlfile.js']
-  /* FIXME: re-enable me once we have multi-part support
-  , 'xhr-multipart': ['transports/xhr.js', 'transports/xhr-multipart.js'] */
-  , 'xhr-polling': ['transports/xhr.js', 'transports/xhr-polling.js']
-  , 'jsonp-polling': [
-        'transports/xhr.js'
-      , 'transports/xhr-polling.js'
-      , 'transports/jsonp-polling.js'
-    ]
 };
 
 /**
@@ -91,11 +76,13 @@ var baseTransports = {
  * If doing a node build for server-side client, this wrapper is NOT included.
  * @api private
  */
-var wrapperPre = "\nvar io = ('undefined' === typeof module ? {} : module.exports);\n(function() {\n";
+var wrapperPre = "/*global console: true, setTimeout: true, clearTimeout: true, setInterval: true, clearInterval: true, module: true, exports: true, require: true, document: true, XMLHttpRequest: true, window: true*/\n";
+wrapperPre += "/*jshint laxcomma: true, unused: false*/";
+wrapperPre += "\nvar io = {}; exports = io;\n(function() {\n";
 
-var wrapperPost = "\nif (typeof define === \"function\" && define.amd) {" +
-                  "\n  define([], function () { return io; });" +
-                  "\n}\n})();";
+var wrapperPost = "})();";//"\nif (typeof define === \"function\" && define.amd) {" +
+                  //"\n  define([], function () { return io; });" +
+                  //"\n}\n})();";
 
 
 /**
@@ -278,7 +265,7 @@ if (!module.parent){
   var args = process.argv.slice(2);
 
   // build a development build
-  builder(args.length ? args : false, { minify:false }, function (err, content) {
+  builder(args.length ? args : false, { minify: false, node: false }, function (err, content) {
     if (err) return console.error(err);
 
     fs.write(
@@ -288,18 +275,5 @@ if (!module.parent){
       , 'utf8'
     );
     console.log('Successfully generated the development build: socket.io.js');
-  });
-
-  // and build a production build
-  builder(args.length ? args : false, function (err, content) {
-    if (err) return console.error(err);
- 
-    fs.write(
-        fs.openSync(__dirname + '/../dist/socket.io.min.js', 'w')
-      , content
-      , 0
-      , 'utf8'
-    );
-    console.log('Successfully generated the production build: socket.io.min.js');
   });
 }
