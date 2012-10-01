@@ -2077,7 +2077,9 @@ var io = {}; exports = io;
     });
 
     this.websocket.addEventListener('error', function (ev) {
-      self.onError(ev);
+      self.onError({
+        advice: 'reconnect'
+      });
     });
 
     this.websocket.open(this.prepareUrl() + query);
