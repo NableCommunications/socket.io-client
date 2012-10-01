@@ -1318,6 +1318,31 @@ var io = {}; exports = io;
       }
     };
 
+    function onerror (ev) {
+      if (self.firstHandshake) {
+        setTimeout(function () {
+          self.handshake(fn);
+        }, 6120);
+        return;
+      }
+
+      self.connecting = false;
+      var err = {
+        reason: ev.error
+      };
+      if (ev.error.indexOf('refused')) {
+        err.advice = 'reconnect';
+      }
+      !self.reconnecting && self.onError(err);
+    }
+
+    if (!Ti.Network.online) {
+      onerror({
+        'error': 'refused'
+      });
+      return;
+    }
+
     var url = [
           'http' + (options.secure ? 's' : '') + ':/'
         , options.host + ':' + options.port
@@ -1332,23 +1357,7 @@ var io = {}; exports = io;
         self.firstHandshake = false;
         complete(xhr.responseText);
       },
-      onerror: function (ev) {
-        if (self.firstHandshake) {
-          setTimeout(function () {
-            self.handshake(fn);
-          }, 6120);
-          return;
-        }
-
-        self.connecting = false;
-        var err = {
-          reason: ev.error
-        };
-        if (ev.error.indexOf('refused')) {
-          err.advice = 'reconnect';
-        }
-        !self.reconnecting && self.onError(err);
-      }
+      onerror: onerror
     });
     xhr.open('GET', url, true);
     xhr.send(null);
