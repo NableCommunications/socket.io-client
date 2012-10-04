@@ -1232,7 +1232,6 @@ var io = {}; exports = io;
 
     io.util.merge(this.options, options);
 
-    this.firstHandshake = true;
     this.connected = false;
     this.open = false;
     this.connecting = false;
@@ -1319,13 +1318,6 @@ var io = {}; exports = io;
     };
 
     function onerror (ev) {
-      if (self.firstHandshake) {
-        setTimeout(function () {
-          self.handshake(fn);
-        }, 6120);
-        return;
-      }
-
       self.connecting = false;
       var err = {
         reason: ev.error
@@ -1354,7 +1346,6 @@ var io = {}; exports = io;
     var xhr = Ti.Network.createHTTPClient({
       withCredentials: true,
       onload: function () {
-        self.firstHandshake = false;
         complete(xhr.responseText);
       },
       onerror: onerror
@@ -1737,17 +1728,8 @@ var io = {}; exports = io;
       }
 
       if (self.reconnectionAttempts++ >= maxAttempts) {
-        if (!self.redoTransports) {
-          self.on('connect_failed', maybeReconnect);
-          self.options['try multiple transports'] = true;
-          self.transports = self.origTransports;
-          self.transport = self.getTransport();
-          self.redoTransports = true;
-          self.connect();
-        } else {
-          self.publish('reconnect_failed');
-          reset();
-        }
+        self.publish('reconnect_failed');
+        reset();
       } else {
         if (self.reconnectionDelay < limit) {
           self.reconnectionDelay *= 2; // exponential back off
