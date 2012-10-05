@@ -1,6 +1,6 @@
 /*! Socket.IO.js build:0.9.10, development. Copyright(c) 2011 LearnBoost <dev@learnboost.com> MIT Licensed */
-/*global console: true, setTimeout: true, clearTimeout: true, setInterval: true, clearInterval: true, module: true, exports: true, require: true, document: true, XMLHttpRequest: true, window: true*/
-/*jshint laxcomma: true, unused: false*/
+/*global Ti: true, console: true, setTimeout: true, clearTimeout: true, setInterval: true, clearTimeout: true, clearInterval: true, module: true, exports: true, require: true, document: true, XMLHttpRequest: true, window: true*/
+/*jshint laxcomma: true, laxbreak: true, unused: false, asi: false */
 var io = {}; exports = io;
 (function() {
 
@@ -309,7 +309,7 @@ var io = {}; exports = io;
   util.inherit = function (ctor, ctor2) {
     function f() {};
     f.prototype = ctor2.prototype;
-    ctor.prototype = new f;
+    ctor.prototype = new f();
   };
 
   /**
@@ -1263,51 +1263,30 @@ var io = {}; exports = io;
         , options.host + ':' + options.port
         , options.resource
         , io.protocol
-        , io.util.query(this.options.query, 't=' + +new Date)
+        , io.util.query(this.options.query, 't=' + new Date())
       ].join('/');
 
-    if (this.isXDomain() && !io.util.ua.hasCORS) {
-      var insertAt = document.getElementsByTagName('script')[0]
-        , script = document.createElement('script');
+    var xhr = io.util.request();
 
-      script.src = url + '&jsonp=' + io.j.length;
-      insertAt.parentNode.insertBefore(script, insertAt);
-
-      io.j.push(function (data) {
-        complete(data);
-        script.parentNode.removeChild(script);
-      });
-    } else {
-
-      if (!Ti.Network.online) {
-        onerror({
-          'error': 'refused'
-        });
-        return;
-      }
-      
-      var xhr = io.util.request();
-
-      xhr.open('GET', url, true);
-      if (this.isXDomain()) {
-        xhr.withCredentials = true;
-      }
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4) {
-          xhr.onreadystatechange = empty;
-
-          if (xhr.status == 200) {
-            complete(xhr.responseText);
-          } else if (xhr.status == 403) {
-            self.onError(xhr.responseText);
-          } else {
-            self.connecting = false;            
-            !self.reconnecting && self.onError(xhr.responseText);
-          }
-        }
-      };
-      xhr.send(null);
+    xhr.open('GET', url, true);
+    if (this.isXDomain()) {
+      xhr.withCredentials = true;
     }
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState == 4) {
+        xhr.onreadystatechange = empty;
+
+        if (xhr.status == 200) {
+          complete(xhr.responseText);
+        } else if (xhr.status == 403) {
+          self.onError(xhr.responseText);
+        } else {
+          self.connecting = false;            
+          !self.reconnecting && self.onError(xhr.responseText);
+        }
+      }
+    };
+    xhr.send(null);
   };
 
   /**

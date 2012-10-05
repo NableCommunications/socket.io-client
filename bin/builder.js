@@ -75,8 +75,8 @@ var baseTransports = {
  * If doing a node build for server-side client, this wrapper is NOT included.
  * @api private
  */
-var wrapperPre = "/*global console: true, setTimeout: true, clearTimeout: true, setInterval: true, clearInterval: true, module: true, exports: true, require: true, document: true, XMLHttpRequest: true, window: true*/\n";
-wrapperPre += "/*jshint laxcomma: true, unused: false*/";
+var wrapperPre = "/*global Ti: true, console: true, setTimeout: true, clearTimeout: true, setInterval: true, clearTimeout: true, clearInterval: true, module: true, exports: true, require: true, document: true, XMLHttpRequest: true, window: true*/\n";
+wrapperPre += "/*jshint laxcomma: true, laxbreak: true, unused: false, asi: false */";
 wrapperPre += "\nvar io = {}; exports = io;\n(function() {\n";
 
 var wrapperPost = "})();";//"\nif (typeof define === \"function\" && define.amd) {" +
