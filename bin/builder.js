@@ -65,9 +65,8 @@ var base = [
  */
 
 var baseTransports = {
-    'websocket': [
-        'transports/websocket.js'
-    ]
+    'websocket': ['transports/websocket.js'],
+    'xhr-polling': ['transports/xhr.js', 'transports/xhr-polling.js']
 };
 
 /**
