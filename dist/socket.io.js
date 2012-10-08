@@ -1366,6 +1366,7 @@ var io = {}; exports = io;
                       self.publish('connect_failed');
                     }
                 }
+                else self.publish('connect_failed');
               }
             }, self.options['connect timeout']);
           }
