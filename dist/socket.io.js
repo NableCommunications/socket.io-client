@@ -26,7 +26,7 @@ var io = {}; exports = io;
    * @api public
    */
 
-  io.version = '0.9.10';
+  io.version = '0.9.11';
 
   /**
    * Protocol implemented.
@@ -1286,6 +1286,10 @@ var io = {}; exports = io;
         }
       }
     };
+    xhr.onerror = function (ev) {
+      self.connecting = false;            
+      !self.reconnecting && self.onError(ev.error);
+    };
     xhr.send(null);
   };
 
@@ -1367,6 +1371,9 @@ var io = {}; exports = io;
                     }
                 }
                 else self.publish('connect_failed');
+              }
+              else {
+                self.publish('connect_failed');
               }
             }, self.options['connect timeout']);
           }
@@ -1595,8 +1602,10 @@ var io = {}; exports = io;
     this.open = false;
 
     if (wasConnected || wasConnecting) {
-      this.transport.close();
-      this.transport.clearTimeouts();
+      if (this.transport) {
+        this.transport.close();
+        this.transport.clearTimeouts();
+      }
       if (wasConnected) {
         this.publish('disconnect', reason);
 
@@ -2048,7 +2057,9 @@ var io = {}; exports = io;
    */
 
   WS.prototype.close = function () {
-    this.websocket.close();
+    if (this.websocket) {
+      this.websocket.close();
+    }    
     return this;
   };
 
@@ -2221,18 +2232,15 @@ var io = {}; exports = io;
       }
     }
 
-    function onload () {
-      this.onload = empty;
-      self.socket.setBuffer(false);
+    function onerror () {
+      this.onerror = empty;
+      self.onClose();
     };
 
     this.sendXHR = this.request('POST');
 
-    if (global.XDomainRequest && this.sendXHR instanceof XDomainRequest) {
-      this.sendXHR.onload = this.sendXHR.onerror = onload;
-    } else {
-      this.sendXHR.onreadystatechange = stateChange;
-    }
+    this.sendXHR.onerror = onerror;
+    this.sendXHR.onreadystatechange = stateChange;
 
     this.sendXHR.send(data);
   };
@@ -2410,14 +2418,6 @@ var io = {}; exports = io;
       }
     };
 
-    function onload () {
-      this.onload = empty;
-      this.onerror = empty;
-      self.retryCounter = 1;
-      self.onData(this.responseText);
-      self.get();
-    };
-
     function onerror () {
       self.retryCounter ++;
       if(!self.retryCounter || self.retryCounter > 3) {
@@ -2429,12 +2429,8 @@ var io = {}; exports = io;
 
     this.xhr = this.request();
 
-    if (global.XDomainRequest && this.xhr instanceof XDomainRequest) {
-      this.xhr.onload = onload;
-      this.xhr.onerror = onerror;
-    } else {
-      this.xhr.onreadystatechange = stateChange;
-    }
+    this.xhr.onerror = onerror;
+    this.xhr.onreadystatechange = stateChange;
 
     this.xhr.send(null);
   };
@@ -2489,4 +2485,5 @@ var io = {}; exports = io;
   , 'undefined' != typeof io ? io : module.parent.exports
   , this
 );
+
 })();
