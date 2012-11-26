@@ -77,7 +77,7 @@ var baseTransports = {
  */
 var wrapperPre = "/*global Ti: true, console: true, setTimeout: true, clearTimeout: true, setInterval: true, clearTimeout: true, clearInterval: true, module: true, exports: true, require: true, document: true, XMLHttpRequest: true, window: true*/\n";
 wrapperPre += "/*jshint laxcomma: true, laxbreak: true, unused: false, asi: false */";
-wrapperPre += "\nvar io = {}; exports = io;\n(function() {\n";
+wrapperPre += "\nvar io = {}; module.exports = io;\n(function() {\n";
 
 var wrapperPost = "\n})();";
 
