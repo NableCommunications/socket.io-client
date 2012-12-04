@@ -1,7 +1,7 @@
 /*! Socket.IO.js build:0.9.10, development. Copyright(c) 2011 LearnBoost <dev@learnboost.com> MIT Licensed */
 /*global Ti: true, console: true, setTimeout: true, clearTimeout: true, setInterval: true, clearTimeout: true, clearInterval: true, module: true, exports: true, require: true, document: true, XMLHttpRequest: true, window: true*/
 /*jshint laxcomma: true, laxbreak: true, unused: false, asi: false */
-var io = {}; exports = io;
+var io = {}; module.exports = io;
 (function() {
 
 /**
